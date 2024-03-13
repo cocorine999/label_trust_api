@@ -183,10 +183,30 @@ Route::namespace("App\Http\Controllers\API\RESTful")->middleware([])->group(func
 
                 Route::apiResource('employees', 'CategoryOfEmployeeController')->parameters([
                     'employees' => 'employee_id'
-                ]);;
+                ]);
 
-                Route::apiResource('employees', 'CategoryOfEmployeController');
+                Route::apiResource('employees', 'CategoryOfEmployeeController');
 
+                Route::group(['namespace' => 'Finances'], function(){
+
+
+                    Route::apiResource('devises', 'DeviseController')->parameters(['devises' => 'devise_id']);
+
+                    Route::apiResource('categories_de_compte', 'CategorieDeCompteController')->parameters(['categories_de_compte' => 'categorie_de_compte_id']);
+    
+                    Route::apiResource('classes_de_compte', 'ClasseDeCompteController')->parameters(['classes_de_compte' => 'classe_de_compte_id']);
+        
+                    Route::apiResource('comptes', 'CompteController')->parameters(['comptes' => 'compte_id']);
+        
+                    Route::apiResource('journaux', 'JournalController')->parameters(['journaux' => 'journal_id']);
+        
+                    Route::apiResource('periodes_exercice', 'PeriodeExerciceController')->parameters(['periodes_exercice' => 'periode_exercice_id']);
+    
+                    Route::apiResource('plans_comptable', 'PlanComptableController')->parameters(['plans_comptable' => 'plan_comptable_id']);
+        
+                    Route::apiResource('exercices_comptable', 'ExerciceComptableController')->parameters(['exercices_comptable' => 'exercice_comptable_id']);
+    
+                });
             });
 
         });
