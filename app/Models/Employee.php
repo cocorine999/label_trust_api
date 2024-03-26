@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Core\Data\Eloquent\Contract\ModelContract;
+use Core\Data\Eloquent\ORMs\Profilable;
 use Core\Utils\Enums\StatutEmployeeEnum;
 use Core\Utils\Enums\TypeEmployeeEnum;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 /**
  * Class ***`Employee`***
@@ -23,6 +24,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  */
 class Employee extends ModelContract
 {
+    use Profilable;
+    
     /**
      * The database connection that should be used by the model.
      *
@@ -78,38 +81,15 @@ class Employee extends ModelContract
         'type_employee'         => TypeEmployeeEnum::class,
         'statut_employee'       => StatutEmployeeEnum::class,
     ];
-    
 
     /**
-     * Get the profil details.
+     * The relationships that should always be loaded.
      *
-     * @return MorphTo
+     * @var array<int, string>
      */
-    public function contractual(): MorphTo
-    {
-        return $this->morphTo();
-    }
-    
-    
-    /**
-     * Get the user's full name attribute.
-     *
-     * @return string The user's full name.
-     */
-    public function getUserNameAttribute(): string
-    {
-        return $this->user->name ;
-    }
-    
-    /**
-     * Get the Unit mesure of the unitTravaille.
-     *
-     * @return BelongsTo
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
+    protected $with = [
+        'employee_temporaire','user','employee_contractuel'
+    ];
 
     /**
      * Interact with the Employee's name.
@@ -122,4 +102,53 @@ class Employee extends ModelContract
         );
     }
 
+
+     /**
+     * Get all of the posts that are assigned this tag.
+     */
+    public function employee_temporaire(): MorphToMany
+    {
+        return $this->morphedByMany(EmployeeNonContractuel::class, 'newcontractable');
+    }
+
+    /**
+     * Get of the non_contractuel (temporaire) that is assigned this employee.
+     */
+    /* public function employee_temporaire(): MorphOne
+    {
+        return $this->morphedByOne(EmployeeNonContractuel::class, 'contractuelable');
+    } */
+    /* public function employee_temporaire()
+    {
+        return $this->morphedByMany(EmployeeNonContractuel::class, 'contractuelable', 'contractuelables', 'contractuelable_id', 'employee_id')
+                    ->using(Contractuelable::class) ->wherePivot('actif', true) ; 
+    } */
+
+       /**
+     * Get of the non_contractuel (temporaire) that is assigned this employee.
+     */
+    /* public function employee_temporaire(): MorphOne
+    {
+        return $this->morphedByOne(EmployeeNonContractuel::class, 'contractuelable');
+    } */
+    /* public function employee_contractuel()
+    {
+        return $this->morphedByMany(EmployeeContractuel::class, 'contractuelable', 'contractuelables', 'contractuelable_id', 'employee_id')
+                    ->using(Contractuelable::class) ->wherePivot('actif', true) ; 
+    } */
+    
+    public function employee_contractuel(): MorphToMany
+    {
+        return $this->morphedByMany(EmployeeContractuel::class, 'newcontractable');
+    }
+
+    /**
+     * Get of the contractual that is assigned this tag.
+     */
+    /* public function employee_contractuel(): MorphOne
+    {
+        return $this->morphedByMany(EmployeeContractuel::class, 'contractuelable');
+    } */
+    
+    
 }

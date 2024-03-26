@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Core\Data\Eloquent\Contract\ModelContract;
-use Core\Utils\Enums\StatutContratEnum;
-use Core\Utils\Enums\TypeContratEnum;
+use Core\Utils\Traits\CPivot;
 
 /**
  * Class ***`Contractuelable`***
@@ -20,6 +19,7 @@ use Core\Utils\Enums\TypeContratEnum;
  */
 class Contractuelable extends ModelContract
 {
+    use  CPivot;
     /**
      * The database connection that should be used by the model.
      *
@@ -34,18 +34,16 @@ class Contractuelable extends ModelContract
      */
     protected $table = 'contractuelables';
 
-
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'employee_id','contractuelable',
-        'actif',
+        'employee_id','contractuelable_type',
+        'actif','contractuelable_id'
     ];
     
-
     /**
      * The model's default attribute values.
      *
@@ -55,6 +53,15 @@ class Contractuelable extends ModelContract
         'actif'          =>true,
     ];
 
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'contractuelable_type',
+        'contractuelable_id',
+    ];
 
     /**
      * The attributes that should be visible in arrays.
@@ -62,7 +69,7 @@ class Contractuelable extends ModelContract
      * @var array<int, string>
      */
     protected $visible = [
-        'employee_id','contractuelable','actif'
+        'actif'
     ];
 
     /**
@@ -72,9 +79,10 @@ class Contractuelable extends ModelContract
      */
     protected $casts = [
         'employee_id'                     =>'string',
-        'contractuelable'                 =>'string',
-        'actif'                         =>'boolean',
+        'contractuelable_id'              =>'string',
+        'contractuelable_type'            =>'string',
+        'actif'                           =>'boolean',
     ];
     
-
+    
 }

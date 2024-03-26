@@ -91,4 +91,5 @@ class CategoryOfEmployeeTaux extends ModelContract
     {
         return $this->belongsTo(TauxAndSalary::class, 'taux_id');
     }
+    
 }

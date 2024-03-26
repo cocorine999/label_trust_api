@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Schema;
 class AddNewColumnsToTables extends Migration
 {
     use CanDeleteTrait, HasCompositeKey, HasForeignKey, HasTimestampsAndSoftDeletes, HasUuidPrimaryKey;
-    
+
     /**
      * Run the migrations.
      *
@@ -58,11 +58,11 @@ class AddNewColumnsToTables extends Migration
                 }
             }
 
-            if (Schema::hasTable('role_permissions')) {
-                // Check if the "attached_by" column does not exist in the "role_permissions" table
-                if (!Schema::hasColumn('role_permissions', 'attached_by')) {
-                    // Modify the "role_permissions" table
-                    Schema::table('role_permissions', function (Blueprint $table) {
+            if (Schema::hasTable('role_has_permissions')) {
+                // Check if the "attached_by" column does not exist in the "role_has_permissions" table
+                if (!Schema::hasColumn('role_has_permissions', 'attached_by')) {
+                    // Modify the "role_has_permissions" table
+                    Schema::table('role_has_permissions', function (Blueprint $table) {
 
                         // Define a foreign key for 'attached_by', referencing the 'users' table
                         $this->foreignKey(
@@ -134,6 +134,23 @@ class AddNewColumnsToTables extends Migration
                 }
             }
 
+            /* if (Schema::hasTable('plan_comptable_compte_sous_comptes')) {
+                // Check if the "sub_account_id" column does not exist in the "plan_comptable_compte_sous_comptes" table
+                if (!Schema::hasColumn('plan_comptable_compte_sous_comptes', 'sub_account_id')) {
+                    // Modify the "plan_comptable_compte_sous_comptes" table
+                    Schema::table('plan_comptable_compte_sous_comptes', function (Blueprint $table) {
+                        // Define a foreign key for 'sub_account_id', referencing the 'plan_comptable_compte_sous_comptes' table
+                        $this->foreignKey(
+                            table: $table,                // The table where the foreign key is being added
+                            column: 'sub_account_id',        // The column to which the foreign key is added ('category_id' in this case)
+                            references: 'plan_comptable_compte_sous_comptes',    // The referenced table (plan_comptable_compte_sous_comptes) to establish the foreign key relationship
+                            onDelete: 'cascade',         // Action to perform when the referenced record is deleted (cascade deletion)
+                            nullable: true              // Specify whether the foreign key column can be nullable (false means it is not allows to be NULL)
+                        );
+                    });
+                }
+            } */
+
             // Commit the transaction
             DB::commit();
         } catch (\Throwable $exception) {
@@ -162,8 +179,37 @@ class AddNewColumnsToTables extends Migration
 
         try {
 
-            if (!Schema::hasTable('roles')) {
-                throw new \Core\Utils\Exceptions\DatabaseMigrationException("Cannot add new columns into 'roles' table that does not exist.");
+            if (Schema::hasTable('roles')) {
+                // Check if the "created_by" column exist in the "roles" table 
+                if (Schema::hasColumn('roles', 'created_by')) {
+                    // Modify the "roles" table
+                    Schema::table('roles', function (Blueprint $table) {
+                        $table->dropForeign('created_by');
+                        $table->dropColumn('created_by');
+                    });
+                }
+            }
+
+            if (Schema::hasTable('role_has_permissions')) {
+                // Check if the "attached_by" column exist in the "role_has_permissions" table 
+                if (Schema::hasColumn('role_has_permissions', 'attached_by')) {
+                    // Modify the "role_has_permissions" table
+                    Schema::table('role_has_permissions', function (Blueprint $table) {
+                        $table->dropForeign('attached_by');
+                        $table->dropColumn('attached_by');
+                    });
+                }
+            }
+
+            if (Schema::hasTable('users')) {
+                // Check if the "created_by" column exist in the "users" table 
+                if (Schema::hasColumn('users', 'created_by')) {
+                    // Modify the "users" table
+                    Schema::table('users', function (Blueprint $table) {
+                        $table->dropForeign('created_by');
+                        $table->dropColumn('created_by');
+                    });
+                }
             }
 
             // Commit the transaction

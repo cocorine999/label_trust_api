@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Core\Data\Eloquent\Contract\ModelContract;
+use Core\Data\Eloquent\ORMs\Contractuelable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 /**
  * Class ***`EmployeeContractuel`***
@@ -18,6 +21,7 @@ use Core\Data\Eloquent\Contract\ModelContract;
  */
 class EmployeeContractuel extends ModelContract
 {
+    //use Contractuelable;
     /**
      * The database connection that should be used by the model.
      *
@@ -39,7 +43,7 @@ class EmployeeContractuel extends ModelContract
      * @var array<int, string>
      */
     protected $fillable = [
-        'est_convertir','categories_of_employee_id'
+
     ];
 
     /**
@@ -48,7 +52,7 @@ class EmployeeContractuel extends ModelContract
      * @var array<string, mixed>
      */
     protected $attributes = [
-        'est_convertir'                 =>false,
+
     ];
 
 
@@ -58,7 +62,7 @@ class EmployeeContractuel extends ModelContract
      * @var array<int, string>
      */
     protected $visible = [
-        'est_convertir','categories_of_employee_id'
+
     ];
 
     /**
@@ -67,11 +71,22 @@ class EmployeeContractuel extends ModelContract
      * @var array<string, string>
      */
     protected $casts = [
-        'est_convertir'                 =>'boolean',
-        'categories_of_employee_id'     =>'string'
+        
     ];
     
+     /**
+     * Get all of the tags for the post.
+     */
+    public function employees()
+    {
+        return $this->morphToMany(Employee::class, 'newcontractable');
+    }
 
-    
-
+    /**
+     * Get the comments for the blog post.
+    */
+    public function contracts(): HasMany
+    {
+        return $this->hasMany(Contract::class);
+    }
 }

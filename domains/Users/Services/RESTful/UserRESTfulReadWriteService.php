@@ -7,15 +7,14 @@ namespace Domains\Users\Services\RESTful;
 use Core\Logic\Services\Contracts\ReadWriteServiceContract;
 use Core\Logic\Services\RestJson\RestJsonReadWriteService;
 use Core\Utils\DataTransfertObjects\DTOInterface;
+use Core\Utils\Exceptions\Contract\CoreException;
 use Core\Utils\Exceptions\QueryException;
 use Core\Utils\Exceptions\ServiceException;
 use Core\Utils\Helpers\Responses\Json\JsonResponseTrait;
 use Domains\Users\Services\RESTful\Contracts\UserRESTfulReadWriteServiceContract;
-use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
-use Throwable;
 
 /**
  * The ***`UserRESTfulReadWriteService`*** class provides RESTful CRUD operations for the "User" resource.
@@ -65,11 +64,47 @@ class UserRESTfulReadWriteService extends RestJsonReadWriteService implements Us
                 data: $user,
                 status_code: Response::HTTP_CREATED
             );
-        } catch (Throwable $exception) {
+        } catch (CoreException $exception) {
             // Rollback the transaction in case of an exception
             DB::rollBack();
             
-            throw new ServiceException(message: $exception->getMessage(), previous: $exception);
+            // Throw a ServiceException with an error message and the caught exception
+            throw new ServiceException(message: $exception->getMessage(), status_code: $exception->getStatusCode(), error_code: $exception->getErrorCode(), code: $exception->getCode(), error: $exception->getError(), previous: $exception);
+        }
+    }
+
+    /**
+     * Update an existing record.
+     *
+     * @param  Model|string                                     $id     The ID of the record to update.
+     * @param  \Core\Utils\DataTransfertObjects\DTOInterface    $data   The data for updating the record.
+     * @return \Illuminate\Http\JsonResponse                            The JSON response indicating whether the update was successful or not.
+     *
+     * @throws \Core\Utils\Exceptions\ServiceException                  If there is an error while updating the record.
+     */
+    public function update($id, DTOInterface $data): JsonResponse
+    {
+        // Begin the transaction
+        DB::beginTransaction();
+
+        try {
+
+            $user = $this->readWriteService->getRepository()->update($id, $data->toArray());
+
+            // Commit the transaction
+            DB::commit();
+
+            return JsonResponseTrait::success(
+                message: 'User updated successfully',
+                data: $user,
+                status_code: Response::HTTP_CREATED
+            );
+        } catch (CoreException $exception) {
+            // Rollback the transaction in case of an exception
+            DB::rollBack();
+            
+            // Throw a ServiceException with an error message and the caught exception
+            throw new ServiceException(message: $exception->getMessage(), status_code: $exception->getStatusCode(), error_code: $exception->getErrorCode(), code: $exception->getCode(), error: $exception->getError(), previous: $exception);
         }
     }
 
@@ -90,7 +125,7 @@ class UserRESTfulReadWriteService extends RestJsonReadWriteService implements Us
 
         try {
             // Call the grantAccess method on the repository to grant access to the role
-            $result = $this->queryService->getRepository()->assignRolePrivileges($userId, $roleIds->toArray()['roles']);
+            $result = $this->readWriteService->getRepository()->assignRolePrivileges($userId, $roleIds->toArray()['roles']);
 
             // If the result is false, throw a custom exception
             if (!$result) {
@@ -107,12 +142,12 @@ class UserRESTfulReadWriteService extends RestJsonReadWriteService implements Us
                 status_code: Response::HTTP_CREATED
             );
 
-        } catch (\Throwable $exception) {
+        } catch (CoreException $exception) {
             // Rollback the transaction in case of an exception
             DB::rollBack();
             
             // Throw a ServiceException with an error message and the caught exception
-            throw new ServiceException(message: 'Failed to grant role privile to the user : ' . $exception->getMessage(), previous: $exception);
+            throw new ServiceException(message: "Failed to grant role privile to the user :" . $exception->getMessage(), status_code: $exception->getStatusCode(), error_code: $exception->getErrorCode(), code: $exception->getCode(), error: $exception->getError(), previous: $exception);
         }
     }
 
@@ -133,7 +168,7 @@ class UserRESTfulReadWriteService extends RestJsonReadWriteService implements Us
 
         try {
             // Call the revokeAccess method on the repository to grant access to the role
-            $result = $this->queryService->getRepository()->revokeRolePrivileges($userId, $roleIds->toArray()['roles']);
+            $result = $this->readWriteService->getRepository()->revokeRolePrivileges($userId, $roleIds->toArray()['roles']);
 
             // If the result is false, throw a custom exception
             if (!$result) {
@@ -149,11 +184,12 @@ class UserRESTfulReadWriteService extends RestJsonReadWriteService implements Us
                 status_code: Response::HTTP_CREATED
             );
 
-        } catch (\Throwable $exception) {
+        } catch (CoreException $exception) {
             // Rollback the transaction in case of an exception
             DB::rollBack();
             
-            throw new ServiceException(message: 'Failed to revoke access from role : ' . $exception->getMessage(), previous: $exception);
+            // Throw a ServiceException with an error message and the caught exception
+            throw new ServiceException(message: "Failed to revoke access role privile from the user :" . $exception->getMessage(), status_code: $exception->getStatusCode(), error_code: $exception->getErrorCode(), code: $exception->getCode(), error: $exception->getError(), previous: $exception);
         }
     }
 }
